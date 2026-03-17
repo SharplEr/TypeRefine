@@ -1,0 +1,31 @@
+name: GitHub Release Only
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing git tag to publish as a GitHub Release
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  github-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Verify tag exists
+        run: git rev-parse "${{ inputs.tag }}"
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          generate_release_notes: true
