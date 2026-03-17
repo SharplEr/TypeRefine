@@ -24,8 +24,31 @@ That means mistakes such as swapped arguments of the same java type fail during 
 </dependency>
 ```
 
-If your build does not automatically discover annotation processors from the
-compile classpath, add `type-refine` to the annotation processor path as well.
+If your build isolates annotation processors from the regular compile classpath,
+add `type-refine` to the annotation processor path as well.
+
+## Gradle
+
+Groovy DSL:
+
+```groovy
+dependencies {
+    compileOnly "io.github.sharpler:type-refine:0.1"
+    annotationProcessor "io.github.sharpler:type-refine:0.1"
+}
+```
+
+Kotlin DSL:
+
+```kotlin
+dependencies {
+    compileOnly("io.github.sharpler:type-refine:0.1")
+    annotationProcessor("io.github.sharpler:type-refine:0.1")
+}
+```
+
+Use `testCompileOnly` and `testAnnotationProcessor` as well if you declare
+invariant annotations inside test sources.
 
 ## Example
 
