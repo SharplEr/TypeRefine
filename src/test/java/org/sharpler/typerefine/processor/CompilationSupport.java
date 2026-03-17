@@ -8,15 +8,19 @@ import java.util.List;
 import java.util.Map;
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaFileObject;
-import javax.tools.StandardJavaFileManager;
 import javax.tools.ToolProvider;
 import org.junit.jupiter.api.Assertions;
 
+/// Provides helper methods for compiling in-memory test projects.
 final class CompilationSupport {
 
+  /// Prevents instantiation of this utility class.
   private CompilationSupport() {
   }
 
+  /// Compiles a synthetic project with the current `InvariantProcessor`.
+  ///
+  /// Source files are materialized under `tempDir` before invoking `javac`.
   static CompilationResult compile(Map<String, String> sources, Path tempDir) throws IOException {
     var compiler = ToolProvider.getSystemJavaCompiler();
     Assertions.assertNotNull(compiler, "System Java compiler is required for compilation tests");
@@ -39,7 +43,8 @@ final class CompilationSupport {
           List.of(
               "--class-path", System.getProperty("java.class.path"),
               "-processor", InvariantProcessor.class.getName(),
-              "-d", outputDir.toString());
+              "-d", outputDir.toString()
+          );
       var task = compiler.getTask(null, fileManager, diagnostics, options, null, compilationUnits);
       var success = Boolean.TRUE.equals(task.call());
       var renderedDiagnostics =

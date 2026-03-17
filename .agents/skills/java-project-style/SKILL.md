@@ -265,6 +265,25 @@ Use pattern matching and modern `switch` forms where they make branching clearer
 
 Do not add defensive `null` handling unless `null` is actually permitted by the API contract or is realistically produced by the code path in question. Prefer trusting non-null contracts and keeping branches out of the code when they encode impossible states.
 
+## Multiline formatting
+
+When a method call, constructor call, or similar argument list is formatted across multiple lines, put each argument on its own line.
+
+Prefer this shape:
+
+```java
+var result =
+    someCall(
+        firstArgument,
+        secondArgument,
+        thirdArgument
+    );
+```
+
+Do not keep several arguments on the same continuation line once the call has already been split across lines.
+
+Keep the closing `)` on its own line aligned with the start of the call continuation, and keep chained wrapping visually flat and easy to scan.
+
 ## Testing
 
 Prefer property-based testing using jqwik for logic-heavy code, parsers, transformations, invariants, algebraic behavior, and edge-case discovery.
