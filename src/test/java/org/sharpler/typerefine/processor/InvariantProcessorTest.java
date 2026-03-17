@@ -53,6 +53,25 @@ final class InvariantProcessorTest {
                 .formatted(swapArguments, String.join("\n", result.diagnostics())));
   }
 
+  @Test
+  void rejectsMismatchedAssignmentsIntoAnnotatedArrays() throws IOException {
+    var result =
+        CompilationSupport.compile(
+            Map.of(
+                "demo/ArenaIndex.java", arenaIndexAnnotationSource(),
+                "demo/DocId.java", docIdAnnotationSource(),
+                "demo/Demo.java", annotatedArrayAssignmentSource()),
+            freshTempDir());
+
+    assertFalse(result.success(), "Compilation should fail for mismatched annotated array assignments");
+    assertTrue(
+        result.diagnostics().stream().anyMatch(message -> message.contains("Assignment in fill")),
+        () -> String.join("\n", result.diagnostics()));
+    assertTrue(
+        result.diagnostics().stream().anyMatch(message -> message.contains("@DocId")),
+        () -> String.join("\n", result.diagnostics()));
+  }
+
   private static Map<String, String> validSources() {
     return Map.of(
         "demo/ArenaIndex.java", arenaIndexAnnotationSource(),
@@ -148,6 +167,22 @@ final class InvariantProcessorTest {
           }
         }
         """.formatted(invocation);
+  }
+
+  private static String annotatedArrayAssignmentSource() {
+    return """
+        package demo;
+
+        final class Demo {
+          private final int @ArenaIndex [] arenaIndicesBuffer = new int[8];
+          private final int @DocId [] docIdsBuffer = new int[8];
+
+          void fill(@ArenaIndex int arenaIndex, @ArenaIndex int docId) {
+            arenaIndicesBuffer[0] = arenaIndex;
+            docIdsBuffer[0] = docId;
+          }
+        }
+        """;
   }
 
   private static Path freshTempDir() throws IOException {

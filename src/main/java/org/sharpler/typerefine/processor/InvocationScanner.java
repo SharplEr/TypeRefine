@@ -1,5 +1,7 @@
 package org.sharpler.typerefine.processor;
 
+import com.sun.source.tree.ArrayAccessTree;
+import com.sun.source.tree.AssignmentTree;
 import com.sun.source.tree.ExpressionTree;
 import com.sun.source.tree.MethodInvocationTree;
 import com.sun.source.util.TreePath;
@@ -37,6 +39,12 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
         return super.visitMethodInvocation(node, unused);
     }
 
+    @Override
+    public @Nullable Void visitAssignment(AssignmentTree node, @Nullable Void unused) {
+        verifyAssignment(node);
+        return super.visitAssignment(node, unused);
+    }
+
     private void verifyInvocation(MethodInvocationTree invocation, ExecutableElement executableElement) {
         var parameters = executableElement.getParameters();
         var arguments = invocation.getArguments();
@@ -56,32 +64,67 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
                 continue;
             }
 
-            reportMismatch(argumentPath, argumentTree, executableElement, index, expectedInvariant, actualInvariant);
+            var message =
+                "Argument %d of %s must carry %s but expression '%s' has %s."
+                    .formatted(
+                        index + 1,
+                        executableElement.getSimpleName(),
+                        renderAnnotationName(expectedInvariant),
+                        argumentTree,
+                        renderActualInvariant(actualInvariant));
+            reportMismatch(argumentPath, executableElement, message);
         }
     }
 
-    private void reportMismatch(
-        TreePath argumentPath,
-        ExpressionTree argumentTree,
-        ExecutableElement executableElement,
-        int parameterIndex,
-        String expectedInvariant,
-        @Nullable String actualInvariant
-    ) {
-        var methodName = executableElement.getSimpleName();
-        var renderedExpectedInvariant = renderAnnotationName(expectedInvariant);
-        var renderedActualInvariant =
-            actualInvariant == null ? "no invariant annotation" : renderAnnotationName(actualInvariant);
+    private void verifyAssignment(AssignmentTree assignment) {
+        var expectedInvariant = expectedInvariantForAssignmentTarget(assignment);
+        if (expectedInvariant == null) {
+            return;
+        }
+
+        var expression = assignment.getExpression();
+        var expressionPath = new TreePath(getCurrentPath(), expression);
+        var actualInvariant = invariantNameForArgument(expressionPath);
+        if (expectedInvariant.equals(actualInvariant)) {
+            return;
+        }
+
+        var executableElement = enclosingExecutableElement(getCurrentPath());
+
         var message =
-            "Argument %d of %s must carry %s but expression '%s' has %s."
+            "Assignment in %s must store %s but expression '%s' has %s."
                 .formatted(
-                    parameterIndex + 1,
-                    methodName,
-                    renderedExpectedInvariant,
-                    argumentTree,
-                    renderedActualInvariant);
+                    executableElement.getSimpleName(),
+                    renderAnnotationName(expectedInvariant),
+                    expression,
+                    renderActualInvariant(actualInvariant));
+        reportMismatch(expressionPath, executableElement, message);
+    }
+
+    private void reportMismatch(TreePath argumentPath, ExecutableElement executableElement, String message) {
         var errorElement = diagnosticElement(argumentPath, executableElement);
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, errorElement);
+    }
+
+    private ExecutableElement enclosingExecutableElement(TreePath path) {
+        for (var currentPath = path; currentPath != null; currentPath = currentPath.getParentPath()) {
+            var element = trees.getElement(currentPath);
+            if (element instanceof ExecutableElement executableElement) {
+                return executableElement;
+            }
+        }
+        throw new IllegalStateException("Expected assignment to be enclosed by an executable element");
+    }
+
+    private @Nullable String expectedInvariantForAssignmentTarget(AssignmentTree assignment) {
+        var variable = assignment.getVariable();
+        if (variable instanceof ArrayAccessTree arrayAccessTree) {
+            var arrayPath = new TreePath(getCurrentPath(), arrayAccessTree.getExpression());
+            return invariantNameForArgument(arrayPath);
+        }
+
+        var variablePath = new TreePath(getCurrentPath(), variable);
+        return singleInvariantName(trees.getTypeMirror(variablePath));
     }
 
     private Element diagnosticElement(TreePath argumentPath, ExecutableElement executableElement) {
@@ -112,7 +155,10 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
         return singleInvariantName(element.getAnnotationMirrors());
     }
 
-    private @Nullable String singleInvariantName(TypeMirror typeMirror) {
+    private @Nullable String singleInvariantName(@Nullable TypeMirror typeMirror) {
+        if (typeMirror == null) {
+            return null;
+        }
         return singleInvariantName(typeMirror.getAnnotationMirrors());
     }
 
@@ -139,6 +185,10 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
                 "TypeRefine supports at most one invariant annotation per type use, found: "
                     + invariantNames);
         return null;
+    }
+
+    private static String renderActualInvariant(@Nullable String actualInvariant) {
+        return actualInvariant == null ? "no invariant annotation" : renderAnnotationName(actualInvariant);
     }
 
     private static String renderAnnotationName(String qualifiedName) {
