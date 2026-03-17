@@ -1,6 +1,7 @@
 package org.sharpler.typerefine.processor;
 
 import com.sun.source.util.Trees;
+import java.lang.reflect.Method;
 import java.util.HashSet;
 import java.util.Set;
 import javax.annotation.processing.AbstractProcessor;
@@ -21,7 +22,7 @@ public final class InvariantProcessor extends AbstractProcessor {
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
-        trees = Trees.instance(processingEnv);
+        trees = Trees.instance(jbUnwrap(ProcessingEnvironment.class, processingEnv));
     }
 
     @Override
@@ -59,5 +60,16 @@ public final class InvariantProcessor extends AbstractProcessor {
         }
 
         return result;
+    }
+
+    private static <T> T jbUnwrap(Class<? extends T> iface, T wrapper) {
+        try {
+            var apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
+            Method unwrapMethod = apiWrappers.getDeclaredMethod("unwrap", Class.class, Object.class);
+            var unwrapped = iface.cast(unwrapMethod.invoke(null, iface, wrapper));
+            return unwrapped == null ? wrapper : unwrapped;
+        } catch (ReflectiveOperationException ignored) {
+            return wrapper;
+        }
     }
 }

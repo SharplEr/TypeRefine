@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.AnnotationMirror;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -55,11 +56,12 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
                 continue;
             }
 
-            reportMismatch(argumentTree, executableElement, index, expectedInvariant, actualInvariant);
+            reportMismatch(argumentPath, argumentTree, executableElement, index, expectedInvariant, actualInvariant);
         }
     }
 
     private void reportMismatch(
+        TreePath argumentPath,
         ExpressionTree argumentTree,
         ExecutableElement executableElement,
         int parameterIndex,
@@ -78,8 +80,13 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
                     renderedExpectedInvariant,
                     argumentTree,
                     renderedActualInvariant);
-        var compilationUnit = getCurrentPath().getCompilationUnit();
-        trees.printMessage(Diagnostic.Kind.ERROR, message, argumentTree, compilationUnit);
+        var errorElement = diagnosticElement(argumentPath, executableElement);
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, errorElement);
+    }
+
+    private Element diagnosticElement(TreePath argumentPath, ExecutableElement executableElement) {
+        var argumentElement = trees.getElement(argumentPath);
+        return argumentElement == null ? executableElement : argumentElement;
     }
 
     private @Nullable String invariantNameForArgument(TreePath argumentPath) {
