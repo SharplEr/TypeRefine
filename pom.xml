@@ -4,7 +4,7 @@
 
   <groupId>io.github.sharpler</groupId>
   <artifactId>type-refine</artifactId>
-  <version>0.1</version>
+  <version>0.2-SNAPSHOT</version>
   <name>TypeRefine</name>
   <description>
     A Java library with an annotation processor for enforcing custom type-use invariants at compile time.
@@ -31,7 +31,7 @@
     <connection>scm:git:https://github.com/SharplEr/TypeRefine.git</connection>
     <developerConnection>scm:git:https://github.com/SharplEr/TypeRefine.git</developerConnection>
     <url>https://github.com/SharplEr/TypeRefine</url>
-    <tag>v0.1</tag>
+    <tag>HEAD</tag>
   </scm>
 
   <properties>
