@@ -4,6 +4,7 @@ target/
 !**/src/test/**/target/
 .kotlin
 .jqwik-database
+settings.xml
 
 ### IntelliJ IDEA ###
 .idea/
