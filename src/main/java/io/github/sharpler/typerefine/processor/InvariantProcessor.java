@@ -10,14 +10,16 @@ import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
-import org.jspecify.annotations.Nullable;
 import io.github.sharpler.typerefine.annotations.Invariant;
+import org.apiguardian.api.API;
+import org.jspecify.annotations.Nullable;
 
 /// Scans compilation units for invariant annotations and validates their usage.
 ///
 /// The processor currently enforces invariant consistency for:
 /// - explicit method invocations,
 /// - assignments into annotated array slots.
+@API(status = API.Status.INTERNAL, since = "0.1")
 @SuppressWarnings("WeakerAccess")
 @SupportedAnnotationTypes("*")
 public final class InvariantProcessor extends AbstractProcessor {
@@ -28,6 +30,7 @@ public final class InvariantProcessor extends AbstractProcessor {
     /// Initializes the processor and unwraps JetBrains JPS wrappers when needed.
     ///
     /// `super.init(...)` must still receive the original wrapper because JPS relies on it.
+    @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
@@ -35,12 +38,14 @@ public final class InvariantProcessor extends AbstractProcessor {
     }
 
     /// Returns the newest source version supported by the running compiler.
+    @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public SourceVersion getSupportedSourceVersion() {
         return SourceVersion.latestSupported();
     }
 
     /// Processes the current round and validates all roots that contain invariant usage.
+    @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         var invariantAnnotationNames = collectInvariantAnnotations(roundEnv);
