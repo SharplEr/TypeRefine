@@ -43,14 +43,14 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
         if (targetElement instanceof ExecutableElement executableElement) {
             verifyInvocation(node, executableElement);
         }
-        return super.visitMethodInvocation(node, unused);
+        return super.visitMethodInvocation(node, null);
     }
 
     /// Validates assignments, including writes into annotated array slots.
     @Override
     public @Nullable Void visitAssignment(AssignmentTree node, @Nullable Void unused) {
         verifyAssignment(node);
-        return super.visitAssignment(node, unused);
+        return super.visitAssignment(node, null);
     }
 
     /// Checks whether each invariant-annotated parameter receives a matching argument.
