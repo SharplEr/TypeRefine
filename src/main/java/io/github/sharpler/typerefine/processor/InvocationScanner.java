@@ -1,4 +1,4 @@
-package org.sharpler.typerefine.processor;
+package io.github.sharpler.typerefine.processor;
 
 import com.sun.source.tree.ArrayAccessTree;
 import com.sun.source.tree.AssignmentTree;

@@ -1,4 +1,4 @@
-package org.sharpler.typerefine.processor;
+package io.github.sharpler.typerefine.processor;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -101,7 +101,7 @@ final class InvariantProcessorTest {
             
             import java.lang.annotation.Retention;
             import java.lang.annotation.Target;
-            import org.sharpler.typerefine.annotations.Invariant;
+            import io.github.sharpler.typerefine.annotations.Invariant;
             
             @Invariant
             @Target(TYPE_USE)
@@ -121,7 +121,7 @@ final class InvariantProcessorTest {
             
             import java.lang.annotation.Retention;
             import java.lang.annotation.Target;
-            import org.sharpler.typerefine.annotations.Invariant;
+            import io.github.sharpler.typerefine.annotations.Invariant;
             
             @Invariant
             @Target(TYPE_USE)

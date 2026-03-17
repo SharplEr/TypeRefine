@@ -1,4 +1,4 @@
-package org.sharpler.typerefine.processor;
+package io.github.sharpler.typerefine.processor;
 
 import com.sun.source.util.Trees;
 import java.util.HashSet;
@@ -11,7 +11,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import org.jspecify.annotations.Nullable;
-import org.sharpler.typerefine.annotations.Invariant;
+import io.github.sharpler.typerefine.annotations.Invariant;
 
 /// Scans compilation units for invariant annotations and validates their usage.
 ///

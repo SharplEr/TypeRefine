@@ -1,4 +1,4 @@
-package org.sharpler.typerefine.annotations;
+package io.github.sharpler.typerefine.annotations;
 
 import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
