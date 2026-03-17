@@ -39,7 +39,6 @@
   <properties>
     <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <fastutil.version>8.5.18</fastutil.version>
     <jspecify.version>1.0.0</jspecify.version>
     <junit.jupiter.version>5.13.4</junit.jupiter.version>
     <jqwik.version>1.9.3</jqwik.version>
@@ -52,11 +51,6 @@
   </properties>
 
   <dependencies>
-    <dependency>
-      <groupId>it.unimi.dsi</groupId>
-      <artifactId>fastutil</artifactId>
-      <version>${fastutil.version}</version>
-    </dependency>
     <dependency>
       <groupId>org.jspecify</groupId>
       <artifactId>jspecify</artifactId>
