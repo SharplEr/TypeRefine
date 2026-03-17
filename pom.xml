@@ -9,13 +9,13 @@
   <version>1.0-SNAPSHOT</version>
 
   <properties>
-    <maven.compiler.source>25</maven.compiler.source>
-    <maven.compiler.target>25</maven.compiler.target>
+    <maven.compiler.release>25</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <fastutil.version>8.5.18</fastutil.version>
     <jspecify.version>1.0.0</jspecify.version>
     <junit.jupiter.version>5.13.4</junit.jupiter.version>
     <jqwik.version>1.9.3</jqwik.version>
+    <maven.compiler.plugin.version>3.14.1</maven.compiler.plugin.version>
     <maven.surefire.plugin.version>3.5.4</maven.surefire.plugin.version>
   </properties>
 
@@ -46,6 +46,14 @@
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>${maven.compiler.plugin.version}</version>
+        <configuration>
+          <proc>none</proc>
+        </configuration>
+      </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
