@@ -21,6 +21,11 @@ final class CompilationSupport {
   /// Compiles a synthetic project with the current `InvariantProcessor`.
   ///
   /// Source files are materialized under `tempDir` before invoking `javac`.
+  ///
+  /// @param sources a map from relative source path to source text
+  /// @param tempDir the temporary directory used for the synthetic project
+  /// @return the compilation result together with rendered diagnostics
+  /// @throws IOException if the temporary source layout cannot be written
   static CompilationResult compile(Map<String, String> sources, Path tempDir) throws IOException {
     var compiler = ToolProvider.getSystemJavaCompiler();
     Assertions.assertNotNull(compiler, "System Java compiler is required for compilation tests");

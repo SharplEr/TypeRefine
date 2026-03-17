@@ -42,6 +42,9 @@ final class InvariantProcessorTest {
     }
 
     /// Verifies that swapping invariant-annotated arguments is rejected.
+    ///
+    /// @param swapArguments whether the generated invocation should intentionally swap arguments
+    /// @throws IOException if the temporary compilation project cannot be created
     @Property
     void rejectsSwappedInvariantArguments(@ForAll boolean swapArguments) throws IOException {
         var result = CompilationSupport.compile(
@@ -83,6 +86,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns a minimal valid multi-file source set for argument checking.
+    ///
+    /// @return a compilable source set that respects all declared invariants
     private static Map<String, String> validSources() {
         return Map.of(
             "demo/ArenaIndex.java", arenaIndexAnnotationSource(),
@@ -92,6 +97,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns an invariant annotation source for arena indices.
+    ///
+    /// @return the source text of a sample `@ArenaIndex` annotation
     private static String arenaIndexAnnotationSource() {
         return """
             package demo;
@@ -112,6 +119,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns an invariant annotation source for document identifiers.
+    ///
+    /// @return the source text of a sample `@DocId` annotation
     private static String docIdAnnotationSource() {
         return """
             package demo;
@@ -132,6 +141,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns a source snippet with a valid invariant-preserving method call.
+    ///
+    /// @return the source text of a valid method invocation example
     private static String matchingUsageSource() {
         return """
             package demo;
@@ -150,6 +161,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns a source snippet with a missing invariant annotation on one argument.
+    ///
+    /// @return the source text of an invalid call with an unannotated argument
     private static String plainArgumentUsageSource() {
         return """
             package demo;
@@ -168,6 +181,9 @@ final class InvariantProcessorTest {
     }
 
     /// Returns a source snippet whose invocation order depends on `swapArguments`.
+    ///
+    /// @param swapArguments whether the generated invocation should swap the arguments
+    /// @return the source text of the generated invocation example
     private static String swappedArgumentUsageSource(boolean swapArguments) {
         var invocation = swapArguments ? "fillDoc(docId, index);" : "fillDoc(index, docId);";
         return """
@@ -187,6 +203,8 @@ final class InvariantProcessorTest {
     }
 
     /// Returns a source snippet that writes an `@ArenaIndex` value into an `@DocId` array.
+    ///
+    /// @return the source text of an invalid annotated-array assignment example
     private static String annotatedArrayAssignmentSource() {
         return """
             package demo;
@@ -204,6 +222,9 @@ final class InvariantProcessorTest {
     }
 
     /// Creates an isolated temporary directory for one compilation test.
+    ///
+    /// @return a fresh temporary directory for synthetic test sources
+    /// @throws IOException if the temporary directory cannot be created
     private static Path freshTempDir() throws IOException {
         return Files.createTempDirectory("typerefine-test-");
     }

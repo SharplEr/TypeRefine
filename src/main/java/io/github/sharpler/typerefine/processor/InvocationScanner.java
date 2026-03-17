@@ -30,6 +30,10 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     private final ProcessingEnvironment processingEnv;
 
     /// Creates a scanner for one processing round.
+    ///
+    /// @param trees compiler tree utilities for the current round
+    /// @param invariantAnnotationNames fully qualified names of known invariant annotations
+    /// @param processingEnv the processing environment used for diagnostics
     InvocationScanner(Trees trees, Set<String> invariantAnnotationNames, ProcessingEnvironment processingEnv) {
         this.trees = trees;
         this.invariantAnnotationNames = invariantAnnotationNames;
@@ -37,6 +41,10 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Validates explicit method invocations encountered during tree scanning.
+    ///
+    /// @param node the visited method invocation
+    /// @param unused the unused scanner payload
+    /// @return the result of continuing the tree scan
     @Override
     public @Nullable Void visitMethodInvocation(MethodInvocationTree node, @Nullable Void unused) {
         var targetElement = trees.getElement(getCurrentPath());
@@ -47,6 +55,10 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Validates assignments, including writes into annotated array slots.
+    ///
+    /// @param node the visited assignment
+    /// @param unused the unused scanner payload
+    /// @return the result of continuing the tree scan
     @Override
     public @Nullable Void visitAssignment(AssignmentTree node, @Nullable Void unused) {
         verifyAssignment(node);
@@ -54,6 +66,9 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Checks whether each invariant-annotated parameter receives a matching argument.
+    ///
+    /// @param invocation the method invocation being validated
+    /// @param executableElement the resolved method being called
     private void verifyInvocation(MethodInvocationTree invocation, ExecutableElement executableElement) {
         var parameters = executableElement.getParameters();
         var arguments = invocation.getArguments();
@@ -86,6 +101,8 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Checks whether an assignment target expects an invariant-annotated value.
+    ///
+    /// @param assignment the assignment being validated
     private void verifyAssignment(AssignmentTree assignment) {
         var expectedInvariant = expectedInvariantForAssignmentTarget(assignment);
         if (expectedInvariant == null) {
@@ -113,11 +130,19 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Emits a compiler error at the most specific element available for the mismatch.
+    ///
+    /// @param argumentPath the tree path of the mismatched expression
+    /// @param executableElement the enclosing executable used as a fallback location
+    /// @param message the diagnostic message to emit
     private void reportMismatch(TreePath argumentPath, ExecutableElement executableElement, String message) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, diagnosticElement(argumentPath, executableElement));
     }
 
     /// Finds the nearest enclosing method or constructor for the current tree path.
+    ///
+    /// @param path the current tree path
+    /// @return the nearest enclosing executable element
+    /// @throws IllegalStateException if no enclosing executable can be found
     private ExecutableElement enclosingExecutableElement(TreePath path) {
         for (var currentPath = path; currentPath != null; currentPath = currentPath.getParentPath()) {
             var element = trees.getElement(currentPath);
@@ -132,6 +157,9 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     ///
     /// For array writes, the invariant is taken from the array type rather than from
     /// `array[index]`, because `javac` stores the annotation on the array type itself.
+    ///
+    /// @param assignment the assignment whose target should be inspected
+    /// @return the expected invariant annotation name, or `null` if none is required
     private @Nullable String expectedInvariantForAssignmentTarget(AssignmentTree assignment) {
         var variable = assignment.getVariable();
         if (variable instanceof ArrayAccessTree arrayAccessTree) {
@@ -144,12 +172,19 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Chooses the element to which a diagnostic should be attached.
+    ///
+    /// @param argumentPath the tree path of the problematic expression
+    /// @param executableElement the enclosing executable used as a fallback location
+    /// @return the most specific available element for attaching a diagnostic
     private Element diagnosticElement(TreePath argumentPath, ExecutableElement executableElement) {
         var argumentElement = trees.getElement(argumentPath);
         return argumentElement == null ? executableElement : argumentElement;
     }
 
     /// Extracts the single invariant annotation visible on an expression, if any.
+    ///
+    /// @param argumentPath the tree path of the inspected expression
+    /// @return the fully qualified invariant annotation name, or `null` if none is visible
     private @Nullable String invariantNameForArgument(TreePath argumentPath) {
         var typeMirror = trees.getTypeMirror(argumentPath);
         var invariantFromType = singleInvariantName(typeMirror);
@@ -174,6 +209,9 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Extracts the single invariant annotation visible on a type mirror, if any.
+    ///
+    /// @param typeMirror the inspected type mirror
+    /// @return the fully qualified invariant annotation name, or `null` if none is visible
     private @Nullable String singleInvariantName(@Nullable TypeMirror typeMirror) {
         if (typeMirror == null) {
             return null;
@@ -184,6 +222,9 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     /// Extracts the single invariant annotation from a list of annotation mirrors.
     ///
     /// If more than one invariant annotation is present, a compilation error is emitted.
+    ///
+    /// @param annotationMirrors the annotations to inspect
+    /// @return the fully qualified invariant annotation name, or `null` if none or many are present
     private @Nullable String singleInvariantName(List<? extends AnnotationMirror> annotationMirrors) {
         var invariantNames = new ArrayList<String>(1);
         for (var annotationMirror : annotationMirrors) {
@@ -210,11 +251,17 @@ final class InvocationScanner extends TreePathScanner<@Nullable Void, @Nullable 
     }
 
     /// Renders the actual invariant name used in diagnostics.
+    ///
+    /// @param actualInvariant the fully qualified invariant annotation name, if any
+    /// @return a human-readable diagnostic label for the actual invariant
     private static String renderActualInvariant(@Nullable String actualInvariant) {
         return actualInvariant == null ? "no invariant annotation" : renderAnnotationName(actualInvariant);
     }
 
     /// Renders a fully qualified annotation name as a short `@SimpleName` label.
+    ///
+    /// @param qualifiedName the fully qualified annotation name
+    /// @return the short annotation label used in diagnostics
     private static String renderAnnotationName(String qualifiedName) {
         var separatorIndex = qualifiedName.lastIndexOf('.');
         return separatorIndex >= 0 ? '@' + qualifiedName.substring(separatorIndex + 1) : '@' + qualifiedName;

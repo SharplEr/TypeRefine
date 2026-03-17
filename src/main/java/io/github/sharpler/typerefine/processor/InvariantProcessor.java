@@ -30,6 +30,8 @@ public final class InvariantProcessor extends AbstractProcessor {
     /// Initializes the processor and unwraps JetBrains JPS wrappers when needed.
     ///
     /// `super.init(...)` must still receive the original wrapper because JPS relies on it.
+    ///
+    /// @param processingEnv the processing environment provided by the compiler
     @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -38,6 +40,8 @@ public final class InvariantProcessor extends AbstractProcessor {
     }
 
     /// Returns the newest source version supported by the running compiler.
+    ///
+    /// @return the latest source version supported by the current compiler
     @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -45,6 +49,10 @@ public final class InvariantProcessor extends AbstractProcessor {
     }
 
     /// Processes the current round and validates all roots that contain invariant usage.
+    ///
+    /// @param annotations the annotation types requested for this round
+    /// @param roundEnv the current annotation processing round
+    /// @return `false` so other processors may also process the same annotations
     @API(status = API.Status.INTERNAL, since = "0.1")
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
@@ -65,6 +73,9 @@ public final class InvariantProcessor extends AbstractProcessor {
     }
 
     /// Collects all annotation type names that are themselves annotated with `@Invariant`.
+    ///
+    /// @param roundEnv the current annotation processing round
+    /// @return the fully qualified names of all discovered invariant annotations
     private static Set<String> collectInvariantAnnotations(RoundEnvironment roundEnv) {
         var elements = roundEnv.getElementsAnnotatedWith(Invariant.class);
         var result = new HashSet<String>(elements.size());
@@ -82,6 +93,11 @@ public final class InvariantProcessor extends AbstractProcessor {
     /// Unwraps IntelliJ JPS wrapper objects when the processor needs raw compiler APIs.
     ///
     /// When the wrapper type is not available, the original object is returned unchanged.
+    ///
+    /// @param iface the expected interface of the wrapped object
+    /// @param wrapper the possibly wrapped compiler object
+    /// @param <T> the static type of the wrapped object
+    /// @return the unwrapped compiler object when available, otherwise `wrapper`
     private static <T> T jbUnwrap(Class<? extends T> iface, T wrapper) {
         try {
             var apiWrappers = wrapper.getClass().getClassLoader().loadClass("org.jetbrains.jps.javac.APIWrappers");
