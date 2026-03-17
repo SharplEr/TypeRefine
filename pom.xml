@@ -5,7 +5,7 @@
   <modelVersion>4.0.0</modelVersion>
 
   <groupId>io.github.sharpler</groupId>
-  <artifactId>TypeRefine</artifactId>
+  <artifactId>type-refine</artifactId>
   <version>0.1</version>
   <name>TypeRefine</name>
   <description>
