@@ -71,6 +71,14 @@ if (flag) {
 }
 ```
 
+Use `var` consistently in resource variables inside `try`-with-resources as well:
+
+```java
+try (var stream = Files.lines(path)) {
+  ...
+}
+```
+
 ## Data modeling
 
 Prefer `record` for plain immutable data carriers, small result objects, parsed values, and structured return types, even if this exposes state a bit more than classic encapsulation would.
@@ -203,7 +211,19 @@ If you need polymorphism, usually prefer an `interface` and small implementation
 
 Do not create deep inheritance trees.
 
+Avoid inner classes unless they are genuinely the clearest representation of tightly coupled local behavior. Do not default to private nested helper classes for one-off logic when a private method, local record, or a small top-level/package-private type is flatter and easier to read.
+
 Do not introduce abstractions just to satisfy a pattern. Introduce them when they remove duplication, clarify a business concept, or protect correctness/performance.
+
+## State and mutation
+
+Prefer data flowing through method parameters and return values over hidden object state.
+
+If a helper conceptually computes a collection or lookup structure, prefer returning it from the helper rather than mutating a field as an implicit side effect.
+
+Avoid spreading one logical computation across multiple methods by mutating shared fields unless that shared state is intrinsic to the object’s long-lived responsibility.
+
+Keep mutation narrow, explicit, and local. If state is only needed within one processing pass, model it as a local variable or an explicit returned value.
 
 ## Business logic and composition
 
@@ -242,6 +262,8 @@ Prefer code that is easy to scan.
 * prefer direct code over abstraction layers when the abstraction does not buy much.
 
 Use pattern matching and modern `switch` forms where they make branching clearer.
+
+Do not add defensive `null` handling unless `null` is actually permitted by the API contract or is realistically produced by the code path in question. Prefer trusting non-null contracts and keeping branches out of the code when they encode impossible states.
 
 ## Testing
 
