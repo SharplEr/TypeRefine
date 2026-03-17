@@ -31,7 +31,7 @@
 
   <scm>
     <connection>scm:git:https://github.com/SharplEr/TypeRefine.git</connection>
-    <developerConnection>scm:git:git@github.com:SharplEr/TypeRefine.git</developerConnection>
+    <developerConnection>scm:git:https://github.com/SharplEr/TypeRefine.git</developerConnection>
     <url>https://github.com/SharplEr/TypeRefine</url>
     <tag>HEAD</tag>
   </scm>
