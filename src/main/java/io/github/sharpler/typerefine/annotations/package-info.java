@@ -1,3 +1,6 @@
+/**
+ * Public annotations used to declare TypeRefine invariants.
+ */
 @API(status = API.Status.STABLE, since = "0.1")
 @NullMarked
 package io.github.sharpler.typerefine.annotations;

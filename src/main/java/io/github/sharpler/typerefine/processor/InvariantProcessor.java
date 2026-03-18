@@ -27,6 +27,10 @@ public final class InvariantProcessor extends AbstractProcessor {
     @SuppressWarnings("FieldAccessedSynchronizedAndUnsynchronized")
     private @Nullable Trees trees;
 
+    /// Creates a processor instance.
+    public InvariantProcessor() {
+    }
+
     /// Initializes the processor and unwraps JetBrains JPS wrappers when needed.
     ///
     /// `super.init(...)` must still receive the original wrapper because JPS relies on it.

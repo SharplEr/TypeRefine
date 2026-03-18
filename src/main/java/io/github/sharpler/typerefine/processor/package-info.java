@@ -1,3 +1,6 @@
+/**
+ * Internal annotation processor implementation used by TypeRefine.
+ */
 @API(status = API.Status.INTERNAL, since = "0.1")
 @NullMarked
 package io.github.sharpler.typerefine.processor;
